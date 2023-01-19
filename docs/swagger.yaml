@@ -6,8 +6,6 @@ info:
 paths:
   /api/users:
     get:
-      security:
-        - Authorization_Token: []
       description: Get Users
       summary: Retrieves users based on query
       parameters:
@@ -39,8 +37,6 @@ paths:
                     $ref: "#/components/schemas/users.User"
   "/api/users/{id}":
     get:
-      security:
-        - Authorization_Token: []
       description: get User by ID
       summary: Retrieves user based on given ID
       parameters:
@@ -60,18 +56,11 @@ paths:
 servers:
   - url: /
 components:
-  securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      name: Authorization
-      in: header
   schemas:
     users.User:
       type: object
       properties:
         firstname:
-          type: string
-        hash:
           type: string
         id:
           type: integer
@@ -84,7 +73,5 @@ components:
     users.UserRole:
       type: object
       properties:
-        id:
-          type: integer
         role_name:
           type: string

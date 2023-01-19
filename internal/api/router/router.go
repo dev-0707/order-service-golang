@@ -1,21 +1,26 @@
 package router
 
 import (
+	// "io"
 	"io"
-	"order-service/internal/api/controllers"
 	"order-service/internal/api/middlewares"
+	"order-service/internal/api/users"
 	"order-service/internal/pkg/config"
 	"order-service/internal/pkg/persistence"
 	"order-service/internal/pkg/service"
 	http_err "order-service/pkg/http-err"
 	"os"
 
-	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/"
 
+	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
+
+	// middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
+	"github.com/gin-gonic/gin"
 )
 
+//https://github.com/antonioalfa22/go-rest-template/blob/master/internal/api/router/router.go
 func Setup(config *config.Configuration) *gin.Engine {
 	ginEngine := createGinEngine(config)
 	userController := buildUserController()
@@ -29,8 +34,17 @@ func Setup(config *config.Configuration) *gin.Engine {
 	return ginEngine
 }
 
-func addUserController(ginEngine *gin.Engine, config *config.Configuration, userController *controllers.UsersControllerDelegate) {
-	controllers.RegisterHandlers(ginEngine, userController)
+func addUserController(ginEngine *gin.Engine, config *config.Configuration, userController *users.UsersControllerDelegate) {
+	// v1 := router.Group("/api/v1")
+	// +       {
+	// +               v1.GET("/books", handlers.GetBooks)
+	// +               v1.GET("/books/:isbn", handlers.GetBookByISBN)
+	// +               // router.DELETE("/books/:isbn", handlers.DeleteBookByISBN)
+	// +               // router.PUT("/books/:isbn", handlers.UpdateBookByISBN)
+	// +               v1.POST("/books", handlers.PostBook)
+	// +       }
+
+	users.RegisterHandlers(ginEngine, userController)
 }
 
 func createGinEngine(config *config.Configuration) *gin.Engine {
@@ -53,11 +67,11 @@ func addSwaggerDocs(r *gin.Engine, configs *config.Configuration) {
 	r.GET(apiConfig.DocsUrl, ginSwagger.CustomWrapHandler(ginSwaggerConfigs, swaggerFiles.Handler))
 }
 
-func buildUserController() *controllers.UsersControllerDelegate {
+func buildUserController() *users.UsersControllerDelegate {
 	userRepository := persistence.GetUserRepository()
 
 	userService := service.NewUserService(*userRepository)
-	userController := controllers.NewUsersControllerDelegate(*userService)
+	userController := users.NewUsersControllerDelegate(*userService)
 	return userController
 }
 

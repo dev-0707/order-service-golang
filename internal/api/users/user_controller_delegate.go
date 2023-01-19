@@ -1,10 +1,9 @@
-package controllers
+package users
 
 import (
 	"fmt"
 	"net/http"
-	"order-service/internal/api/dto"
-	"order-service/internal/api/problems"
+	"order-service/internal/api/middlewares"
 	models "order-service/internal/pkg/models/users"
 	"order-service/internal/pkg/service"
 	"strconv"
@@ -26,30 +25,26 @@ func NewUsersControllerDelegate(userService service.UserService) *UsersControlle
 func (s *UsersControllerDelegate) GetApiUsersId(c *gin.Context, id int) {
 	userId := strconv.Itoa(id)
 	if user, err := s.userService.Get(userId); err != nil {
-		problem := problems.UserProblem{
-			DefaultProblem: *problems.NewProblem(http.StatusNotFound, fmt.Sprintf("/users/%d", id), "User Not Found", fmt.Sprintf("L'utente con ID:%d non esiste", id)),
-			Id:             id,
-		}
-		c.JSON(http.StatusInternalServerError, problem)
-		return
+		middlewares.HandleValidationError(c, err)
+
 	} else {
 		if err != nil {
 			log.Error().Err(err).Msg(fmt.Sprintf("Errore conversione '/api/users/%d' response Dto", id))
-			problem := *problems.NewProblem(http.StatusInternalServerError, fmt.Sprintf("/users/%d", id), "Response processing error", "Errore conversione payload risposta")
-			c.JSON(http.StatusInternalServerError, problem)
+			//problem := *problems.NewProblem(http.StatusInternalServerError, fmt.Sprintf("/users/%d", id), "Response processing error", "Errore conversione payload risposta")
+			c.JSON(http.StatusInternalServerError, nil)
 			return
 		}
 		c.JSON(http.StatusOK, toUserDto(*user))
 	}
 }
 
-func (s *UsersControllerDelegate) GetApiUsers(c *gin.Context, params dto.GetApiUsersParams) {
+func (s *UsersControllerDelegate) GetApiUsers(c *gin.Context, params GetApiUsersParams) {
 	var q models.User
 	_ = c.Bind(&q)
 	if users, err := s.userService.Query(&q); err != nil {
 		log.Error().Err(err).Msg("Errore recupero lista utenti /api/users")
-		problem := *problems.NewProblem(http.StatusInternalServerError, fmt.Sprintf("/api/users"), "Response processing error", "Errore recupero lista utenti")
-		c.JSON(http.StatusInternalServerError, problem)
+		//problem := *problems.NewProblem(http.StatusInternalServerError, fmt.Sprintf("/api/users"), "Response processing error", "Errore recupero lista utenti")
+		c.JSON(http.StatusInternalServerError, nil)
 		return
 	} else {
 		c.JSON(http.StatusOK, users)
@@ -68,8 +63,9 @@ func (s *UsersControllerDelegate) CreateUser(c *gin.Context) {
 	}
 	if err := s.userService.Add(&user); err != nil {
 		log.Error().Err(err).Msg("Errore creazione utente '/api/users")
-		problem := *problems.NewProblem(http.StatusInternalServerError, "/users/%d", "Response error", "Errore creazione utente")
-		c.JSON(http.StatusInternalServerError, problem)
+		//problem := *problems.NewProblem(http.StatusInternalServerError, "/users/%d", "Response error", "Errore creazione utente")
+		//problem := *problems.NewProblem(http.StatusInternalServerError, "/users/%d", "Response error", "Errore creazione utente")
+		c.JSON(http.StatusInternalServerError, nil)
 		return
 	} else {
 		if err != nil {

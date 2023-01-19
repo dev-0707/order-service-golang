@@ -25,7 +25,7 @@ var doc = `{
         },
         "license": {
             "name": "MIT",
-            "url": "https://order-service/blob/master/LICENSE"
+            "url": "https://github.com/antonioalfa22/go-rest-template/blob/master/LICENSE"
         },
         "version": "{{.Version}}"
     },

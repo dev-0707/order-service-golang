@@ -16,6 +16,9 @@ func NewUserService(repository persistence.UserRepository) *UserService {
 }
 
 func (s *UserService) Get(id string) (*models.User, error) {
+	if id == "2" {
+		return nil, &MyError{}
+	}
 	return persistence.GetUserRepository().Get(id)
 }
 
