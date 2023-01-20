@@ -18,7 +18,9 @@ server:
   logFileEnabled: false
   logPath: "log/api.log"
   api:
-    docsUrl: "/swagger/*any"
-    docsPath: "/docs/swagger.yaml"
+    swaggerDocsUrl: "/swagger/*any"
+    docsPath: "docs/swagger.yaml"
+    docsUrl: "/docs/swagger.yaml"
+
 logging:
  level: "debug"

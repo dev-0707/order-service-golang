@@ -1,7 +1,6 @@
 package router
 
 import (
-	// "io"
 	"io"
 	"order-service/internal/api/middlewares"
 	"order-service/internal/api/users"
@@ -11,16 +10,13 @@ import (
 	http_err "order-service/pkg/http-err"
 	"os"
 
-	swaggerFiles "github.com/swaggo/"
+	"github.com/rs/zerolog/log"
 
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
-	// middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
-//https://github.com/antonioalfa22/go-rest-template/blob/master/internal/api/router/router.go
 func Setup(config *config.Configuration) *gin.Engine {
 	ginEngine := createGinEngine(config)
 	userController := buildUserController()
@@ -43,7 +39,6 @@ func addUserController(ginEngine *gin.Engine, config *config.Configuration, user
 	// +               // router.PUT("/books/:isbn", handlers.UpdateBookByISBN)
 	// +               v1.POST("/books", handlers.PostBook)
 	// +       }
-
 	users.RegisterHandlers(ginEngine, userController)
 }
 
@@ -57,14 +52,19 @@ func createGinEngine(config *config.Configuration) *gin.Engine {
 }
 
 func addSwaggerDocs(r *gin.Engine, configs *config.Configuration) {
-	apiConfig := configs.Server.Api
-	r.StaticFile(apiConfig.DocsPath, apiConfig.DocsPath)
-
-	ginSwaggerConfigs := &ginSwagger.Config{
-		URL: apiConfig.DocsPath,
+	swagger, err := users.GetSwagger()
+	if err != nil {
+		log.Error().Err(err).Msg("Errore configurazione Swagger Docs")
+		os.Exit(1)
 	}
 
-	r.GET(apiConfig.DocsUrl, ginSwagger.CustomWrapHandler(ginSwaggerConfigs, swaggerFiles.Handler))
+	swagger.Servers = nil
+
+	r.StaticFile(configs.Server.Api.DocsPath, configs.Server.Api.DocsPath)
+	config := &ginSwagger.Config{
+		URL: configs.Server.Api.DocsUrl,
+	}
+	r.GET(configs.Server.Api.SwaggerDocsUrl, ginSwagger.CustomWrapHandler(config, swaggerFiles.Handler))
 }
 
 func buildUserController() *users.UsersControllerDelegate {

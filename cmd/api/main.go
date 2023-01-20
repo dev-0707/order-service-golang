@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	// _ "order-service/docs"
 	"order-service/internal/api/router"
 	"order-service/internal/pkg/config"
 	"order-service/internal/pkg/db"
@@ -28,8 +30,8 @@ func setConfiguration(configPath string) {
 }
 
 func main() {
-	setConfiguration("../../data/config-postgres.yml")
-	// setConfiguration("data/config-postgres.yml")
+	// setConfiguration("../../data/config-postgres.yml")
+	setConfiguration("data/config-postgres.yml")
 	conf := config.GetConfig()
 	// configureLogger(conf)
 	s := NewGinServer(conf)

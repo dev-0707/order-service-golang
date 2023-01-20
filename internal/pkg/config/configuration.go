@@ -43,8 +43,9 @@ type ServerConfiguration struct {
 }
 
 type ApiConfiguration struct {
-	DocsUrl  string
-	DocsPath string
+	DocsPath       string
+	DocsUrl        string
+	SwaggerDocsUrl string
 }
 
 // SetupDB initialize configuration
