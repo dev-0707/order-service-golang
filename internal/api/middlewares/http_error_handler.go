@@ -12,13 +12,17 @@ import (
 
 func HandleValidationError(c *gin.Context, err error) {
 	// var logMessage, statusCode, message, errorType = buildError(c, err)
-	var problem, logMessage = buildError(c, err)
-	log.Error().Err(err).Msg(logMessage)
-	c.JSON(http.StatusInternalServerError, problem)
+	buildError(c, err)
 	return
 }
 
-func buildError(c *gin.Context, err error) (*problems.Problem, string) {
+func buildError(c *gin.Context, err error) {
+	var problem, logMessage = buildValidationError(c, err)
+	log.Error().Err(err).Msg(logMessage)
+	c.JSON(http.StatusInternalServerError, problem)
+}
+
+func buildValidationError(c *gin.Context, err error) (*problems.Problem, string) {
 	var logMessage string
 	var statusCode int
 	var message string
@@ -41,13 +45,15 @@ func buildError(c *gin.Context, err error) (*problems.Problem, string) {
 // NoMethodHandler
 func NoMethodHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(405, gin.H{"message": "Metodo no permitido"})
+		problem := problems.NewProblem(405, c.Request.URL.Path, http.StatusText(400), "Method not allowed")
+		c.JSONP(405, problem)
 	}
 }
 
 // NoRouteHandler
 func NoRouteHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.JSON(404, gin.H{"message": "Page not found"})
+		problem := problems.NewProblem(404, c.Request.URL.Path, http.StatusText(404), "Resource not found")
+		c.JSONP(404, problem)
 	}
 }

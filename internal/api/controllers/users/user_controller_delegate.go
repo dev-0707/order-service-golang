@@ -51,7 +51,7 @@ func (s *UsersControllerDelegate) GetApiUsers(c *gin.Context, params GetApiUsers
 	}
 }
 
-func (s *UsersControllerDelegate) CreateUser(c *gin.Context) {
+func (s *UsersControllerDelegate) PostApiUsers(c *gin.Context) {
 	var userInput UserInput
 	_ = c.BindJSON(&userInput)
 	user := models.User{

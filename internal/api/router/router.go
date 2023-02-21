@@ -2,28 +2,33 @@ package router
 
 import (
 	"io"
+	"net/http"
+	proximityChannel "order-service/internal/api/controllers/proximity-channel"
+	proximity_channel "order-service/internal/api/controllers/proximity-channel"
+	"order-service/internal/api/controllers/users"
 	"order-service/internal/api/middlewares"
-	"order-service/internal/api/users"
 	"order-service/internal/pkg/config"
-	"order-service/internal/pkg/persistence"
-	"order-service/internal/pkg/service"
 	http_err "order-service/pkg/http-err"
 	"os"
 
-	"github.com/rs/zerolog/log"
+	"order-service/internal/api/problems"
 
+	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func Setup(config *config.Configuration) *gin.Engine {
 	ginEngine := createGinEngine(config)
-	userController := buildUserController()
+	//userController := buildUserController()
+
 	// Routes
 	addSwaggerDocs(ginEngine, config)
 	addMiddlewares(ginEngine, config)
-	addUserController(ginEngine, config, userController)
+	//addUserController(ginEngine, config, userController)
+	addProximityChannelController(ginEngine, config, proximityChannel.NewProximityChannelControllerDelegate())
 	if config.Server.LogFileEnabled {
 		addLogToFile(config)
 	}
@@ -31,15 +36,28 @@ func Setup(config *config.Configuration) *gin.Engine {
 }
 
 func addUserController(ginEngine *gin.Engine, config *config.Configuration, userController *users.UsersControllerDelegate) {
-	// v1 := router.Group("/api/v1")
-	// +       {
-	// +               v1.GET("/books", handlers.GetBooks)
-	// +               v1.GET("/books/:isbn", handlers.GetBookByISBN)
-	// +               // router.DELETE("/books/:isbn", handlers.DeleteBookByISBN)
-	// +               // router.PUT("/books/:isbn", handlers.UpdateBookByISBN)
-	// +               v1.POST("/books", handlers.PostBook)
-	// +       }
 	users.RegisterHandlers(ginEngine, userController)
+
+	swagger, err := users.GetSwagger()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	ginEngine.Use(middleware.OapiRequestValidator(swagger))
+}
+
+func addProximityChannelController(ginEngine *gin.Engine, config *config.Configuration, proximityChannelDelegate *proximityChannel.ProximityChannelControllerDelegate) {
+	//Default handler
+	//proximityChannel.RegisterHandlers(ginEngine, proximityChannelDelegate)
+
+	errorHandler := func(c *gin.Context, err error, statusCode int) {
+		problem := problems.NewProblem(statusCode, c.Request.URL.Path, http.StatusText(statusCode), err.Error())
+		c.JSONP(statusCode, problem)
+	}
+	// miuddl := []proximity_channel.MiddlewareFunc{proximity_channel.MiddlewareFunc(middlewares.NoMethodHandler())}
+
+	options := proximity_channel.GinServerOptions{BaseURL: "/proximity-channel", Middlewares: nil, ErrorHandler: errorHandler}
+	proximityChannel.RegisterHandlersWithOptions(ginEngine, proximityChannelDelegate, options)
 }
 
 func createGinEngine(config *config.Configuration) *gin.Engine {
@@ -67,17 +85,19 @@ func addSwaggerDocs(r *gin.Engine, configs *config.Configuration) {
 	r.GET(configs.Server.Api.SwaggerDocsUrl, ginSwagger.CustomWrapHandler(config, swaggerFiles.Handler))
 }
 
-func buildUserController() *users.UsersControllerDelegate {
-	userRepository := persistence.GetUserRepository()
+// func buildUserController() *users.UsersControllerDelegate {
+// 	userRepository := persistence.GetUserRepository()
 
-	userService := service.NewUserService(*userRepository)
-	userController := users.NewUsersControllerDelegate(*userService)
-	return userController
-}
+// 	userService := service.NewUserService(*userRepository)
+// 	userController := users.NewUsersControllerDelegate(*userService)
+
+// 	return userController
+// }
 
 func addMiddlewares(ginEngine *gin.Engine, configs *config.Configuration) {
 	// app.Use(gin.Recovery())
 	ginEngine.Use(middlewares.CORS())
+	ginEngine.NoMethod(middlewares.NoMethodHandler())
 	ginEngine.NoRoute(middlewares.NoRouteHandler())
 	ginEngine.Use(gin.CustomRecovery(http_err.InternalServerErrorHandler))
 
