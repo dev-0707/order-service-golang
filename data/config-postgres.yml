@@ -13,14 +13,16 @@ database:
 server:
   port: "3000"
   secret: "jdnfksdmfksda"
-  mode: "release"
+  mode: "debug"
   logEnabled: true
   logFileEnabled: false
   logPath: "log/api.log"
   api:
     swaggerDocsUrl: "/swagger/*any"
-    docsPath: "docs/swagger.yaml"
-    docsUrl: "/docs/swagger.yaml"
+    docsPath: "../docs/swagger.yaml"
+    #docsPath: "/docs/swagger.yaml"
+    docsUrl: "../docs/swagger.yaCml"
+    #docsUrl: "docs/swagger.yaml"
 
 logging:
  level: "debug"

@@ -1,22 +1,18 @@
-package users
+package order
 
-import (
-	"order-service/internal/pkg/models/users"
-)
+import "order-service/internal/pkg/model"
 
-func toUserDto(user users.User) UsersUser {
-	userRole := user.Role
+func toOrderDto(cliente model.Order) OrderDto {
+	//userRole := cliente.Cliente
 
-	var userRoleDto UsersUserRole = UsersUserRole{
-		RoleName: &userRole.RoleName,
-	}
+	// var userRoleDto UsersUserRole = UsersUserRole{
+	// 	RoleName: &userRole.RoleName,
+	// }
 
-	return UsersUser{
-		Firstname: &user.Firstname,
-		Lastname:  &user.Lastname,
-		Role:      &userRoleDto,
-		Username:  &user.Username,
-	}
+	// return OrderLine{
+	// 	CodiceFiscale: cliente.CodiceFiscale,
+	// }
+	return OrderDto{}
 }
 
 // func toUser(userDto dto.UsersUser) users.User {

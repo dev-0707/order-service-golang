@@ -3,61 +3,39 @@ package router
 import (
 	"io"
 	"net/http"
-	proximityChannel "order-service/internal/api/controllers/proximity-channel"
-	proximity_channel "order-service/internal/api/controllers/proximity-channel"
-	"order-service/internal/api/controllers/users"
+	"order-service/internal/api/controllers/order"
 	"order-service/internal/api/middlewares"
+	"order-service/internal/api/problems"
 	"order-service/internal/pkg/config"
+	"order-service/internal/pkg/persistence"
+	"order-service/internal/pkg/service"
 	http_err "order-service/pkg/http-err"
 	"os"
 
-	"order-service/internal/api/problems"
-
-	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
 func Setup(config *config.Configuration) *gin.Engine {
 	ginEngine := createGinEngine(config)
-	//userController := buildUserController()
-
 	// Routes
-	addSwaggerDocs(ginEngine, config)
+	// addSwaggerDocs(ginEngine, config)
 	addMiddlewares(ginEngine, config)
-	//addUserController(ginEngine, config, userController)
-	addProximityChannelController(ginEngine, config, proximityChannel.NewProximityChannelControllerDelegate())
+	addOrderRestController(ginEngine, config, buildOrderDelegate())
 	if config.Server.LogFileEnabled {
 		addLogToFile(config)
 	}
 	return ginEngine
 }
 
-func addUserController(ginEngine *gin.Engine, config *config.Configuration, userController *users.UsersControllerDelegate) {
-	users.RegisterHandlers(ginEngine, userController)
-
-	swagger, err := users.GetSwagger()
-	if err != nil {
-		os.Exit(1)
-	}
-
-	ginEngine.Use(middleware.OapiRequestValidator(swagger))
-}
-
-func addProximityChannelController(ginEngine *gin.Engine, config *config.Configuration, proximityChannelDelegate *proximityChannel.ProximityChannelControllerDelegate) {
+func addOrderRestController(ginEngine *gin.Engine, config *config.Configuration, proximityChannelDelegate *order.OrderControllerDelegate) {
 	//Default handler
 	//proximityChannel.RegisterHandlers(ginEngine, proximityChannelDelegate)
-
 	errorHandler := func(c *gin.Context, err error, statusCode int) {
 		problem := problems.NewProblem(statusCode, c.Request.URL.Path, http.StatusText(statusCode), err.Error())
 		c.JSONP(statusCode, problem)
 	}
-	// miuddl := []proximity_channel.MiddlewareFunc{proximity_channel.MiddlewareFunc(middlewares.NoMethodHandler())}
-
-	options := proximity_channel.GinServerOptions{BaseURL: "/proximity-channel", Middlewares: nil, ErrorHandler: errorHandler}
-	proximityChannel.RegisterHandlersWithOptions(ginEngine, proximityChannelDelegate, options)
+	options := order.GinServerOptions{BaseURL: "/api", Middlewares: nil, ErrorHandler: errorHandler}
+	order.RegisterHandlersWithOptions(ginEngine, proximityChannelDelegate, options)
 }
 
 func createGinEngine(config *config.Configuration) *gin.Engine {
@@ -69,29 +47,10 @@ func createGinEngine(config *config.Configuration) *gin.Engine {
 	return ginEngine
 }
 
-func addSwaggerDocs(r *gin.Engine, configs *config.Configuration) {
-	swagger, err := users.GetSwagger()
-	if err != nil {
-		log.Error().Err(err).Msg("Errore configurazione Swagger Docs")
-		os.Exit(1)
-	}
-
-	swagger.Servers = nil
-
-	r.StaticFile(configs.Server.Api.DocsPath, configs.Server.Api.DocsPath)
-	config := &ginSwagger.Config{
-		URL: configs.Server.Api.DocsUrl,
-	}
-	r.GET(configs.Server.Api.SwaggerDocsUrl, ginSwagger.CustomWrapHandler(config, swaggerFiles.Handler))
-}
-
-// func buildUserController() *users.UsersControllerDelegate {
-// 	userRepository := persistence.GetUserRepository()
-
-// 	userService := service.NewUserService(*userRepository)
-// 	userController := users.NewUsersControllerDelegate(*userService)
-
-// 	return userController
+// 	config := &ginSwagger.Config{
+// 		URL: configs.Server.Api.DocsUrl,
+// 	}
+// 	r.GET(configs.Server.Api.SwaggerDocsUrl, ginSwagger.CustomWrapHandler(config, swaggerFiles.Handler))
 // }
 
 func addMiddlewares(ginEngine *gin.Engine, configs *config.Configuration) {
@@ -110,4 +69,13 @@ func addLogToFile(configs *config.Configuration) {
 	f, _ := os.Create(configs.Server.LogPath)
 	gin.DisableConsoleColor()
 	gin.DefaultWriter = io.MultiWriter(f)
+}
+
+func buildOrderDelegate() *order.OrderControllerDelegate {
+	orderRepository := persistence.GetOrderRepository()
+
+	orderService := service.NewOrderService(*orderRepository)
+	orderControllerDelegate := order.NewOrderControllerDelegate(*orderService)
+
+	return orderControllerDelegate
 }

@@ -30,8 +30,8 @@ func setConfiguration(configPath string) {
 }
 
 func main() {
-	// setConfiguration("../../data/config-postgres.yml")
-	setConfiguration("data/config-postgres.yml")
+	setConfiguration("../../data/config-postgres.yml")
+	// setConfiguration("data/config-postgres.yml")
 	conf := config.GetConfig()
 	// configureLogger(conf)
 	s := NewGinServer(conf)

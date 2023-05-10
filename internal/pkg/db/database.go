@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"order-service/internal/pkg/config"
-	"order-service/internal/pkg/models/users"
+	"order-service/internal/pkg/model"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -71,8 +71,7 @@ func SetupDB() {
 
 // Auto migrate project models
 func migration() {
-	DB.AutoMigrate(&users.User{})
-	DB.AutoMigrate(&users.UserRole{})
+	DB.AutoMigrate(&model.Order{})
 }
 
 func GetDB() *gorm.DB {
