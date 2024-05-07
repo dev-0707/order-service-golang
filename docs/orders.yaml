@@ -1,188 +1,917 @@
-openapi: 3.0.0
-info:
-   title: Order Service - REST API
-   description: Order Service - REST API
-   version: 1.0.0
-   contact: {}
-servers:
--  url: http://localhost:8080/api/v1
+openapi: 3.0.0  
+servers:    
+  - url: https://digital-solutions.com/ecommerce/api/v1/orders
+info:   
+  description: orders Api Spec description
+  version: "1.0" 
+  title: orders Api Spec Title
+  termsOfService: https://digital-solutions.com/terms
+  contact:  
+    email: digital@local.local
+  license:  
+    name: Apache 3
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-#### Clienti ####
-   /orders:
-      post:
-         summary: Submit order
-         description: Submit new order
-         operationId: createOrder
-        #  parameters:
-        #  -  $ref: '#/components/parameters/idGestore'
-         requestBody:
-            description: New order
-            required: true
-            content:
-               application/json:
-                  schema:
-                     $ref: '#/components/schemas/CreateOrderDto'
-         responses:
-            '201':
-               description: Order created
-               content:
-                  application/json:
-                     schema:
-                        $ref: '#/components/schemas/CreateOrderDto'
-            '400':
-               description: Bad request, please check and retry
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '400'
-                        messaggio: Bad request, please check and retry
-                        dettaglio: [Missing or not valid Field 'fieldName1' , Missing or not valid Field 'fieldName2']
-            '500':
-               description: Internal server error
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '500'
-                        messaggio: An internal server is occurred, please retry
-            '401':
-               description: Not Authenticated
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '401'
-                        messaggio: Not authenticated
-         tags:
-         - order
-   /orders/{orderId}:
-      get:
-         summary: Get order by id
-         description: Get order by id
-         operationId: getById
-         parameters:
-         -  name: orderId
-            in: path
-            required: true
-            description: Order Id
+  /orders:
+    post:
+      tags:
+        - orders
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
             schema:
-               type: string         
-         responses:
-            '200':
-               description: Order
-               content:
-                  application/json:
-                     schema:
-                        $ref: '#/components/schemas/OrderDto'
-            '400':
-               description: Bad request, please check and retry
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '400'
-                        messaggio: Bad request, please check and retry
-                        dettaglio: [Missing or not valid Field 'fieldName1' , Missing or not valid Field 'fieldName2']
-            '500':
-               description: Internal server error
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '500'
-                        messaggio: An internal server is occurred, please retry
-            '401':
-               description: Not Authenticated
-               content:
-                  application/json:
-                     schema:
-                          $ref: '#/components/schemas/Error'
-                     example:
-                        codice: '401'
-                        messaggio: Not authenticated
-         tags:
-         - order         
-components:
-   links: {}
-   callbacks: {}
-   schemas:
-    OrderDto:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          description: "Bad Request"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConstraintViolation'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-request
+                title: "Bad Request"
+                status: 400
+                detail: "Bad Request"
+                instance: ""
+        '401':
+          description: "Not Authorized"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-authorized
+                title: "Not Authorized"
+                status: 401
+                detail: "Not Authorized"
+                instance: ""
+        '404':
+          description: "Not Found"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-found
+                title: "Not Found"
+                status: 404
+                detail: "Not Found"
+                instance: ""
+        '500':
+          description: "Internal Server error"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/internal-server-error
+                title: "Internal Server error"
+                status: 500
+                detail: "Internal Server error"
+                instance: ""
+        '502':
+          description: "Bad Gateway"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-gateway
+                title: "Bad Gateway"
+                status: 502
+                detail: "Bad Gateway"
+                instance: ""
+        '429':
+          description: "Too Many Requests"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/too-many-requests
+                title: "Too Many Requests"
+                status: 429
+                detail: "Too Many Requests"
+                instance: ""
+      security:
+        - oauth2:
+          - write:orders
+    get:
+      tags:
+        - orders
+      operationId: getorders
+      parameters:
+        - name: accept_language
+          in: query
+          schema:
+            type: string
+        - name: comment
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortOrder'
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties: 
+                  orders: 
+                    type: array
+                    items: 
+                      schema: 
+                      $ref: '#/components/schemas/Store'
+                  metadata:
+                    type: object
+                    properties:
+                      pagination:
+                        type: object
+                        schema:
+                        $ref: '#/components/schemas/OffsetPagination'
+        '400':
+          description: "Bad Request"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConstraintViolation'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-request
+                title: "Bad Request"
+                status: 400
+                detail: "Bad Request"
+                instance: ""
+        '401':
+          description: "Not Authorized"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-authorized
+                title: "Not Authorized"
+                status: 401
+                detail: "Not Authorized"
+                instance: ""
+        '404':
+          description: "Not Found"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-found
+                title: "Not Found"
+                status: 404
+                detail: "Not Found"
+                instance: ""
+        '500':
+          description: "Internal Server error"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/internal-server-error
+                title: "Internal Server error"
+                status: 500
+                detail: "Internal Server error"
+                instance: ""
+        '502':
+          description: "Bad Gateway"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-gateway
+                title: "Bad Gateway"
+                status: 502
+                detail: "Bad Gateway"
+                instance: ""
+        '429':
+          description: "Too Many Requests"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/too-many-requests
+                title: "Too Many Requests"
+                status: 429
+                detail: "Too Many Requests"
+                instance: ""
+      security:
+        - oauth2:
+          - read:orders
+  /orders/{orderId}:
+    get:
+      tags:
+        - orders
+      operationId: getOrderById
+      parameters:
+        - name: orderId
+          in: path
+          description: IDofpetthatneedstobeupdated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+          content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Store'
+        '400':
+          description: "Bad Request"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConstraintViolation'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-request
+                title: "Bad Request"
+                status: 400
+                detail: "Bad Request"
+                instance: ""
+        '401':
+          description: "Not Authorized"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-authorized
+                title: "Not Authorized"
+                status: 401
+                detail: "Not Authorized"
+                instance: ""
+        '404':
+          description: "Not Found"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-found
+                title: "Not Found"
+                status: 404
+                detail: "Not Found"
+                instance: ""
+        '500':
+          description: "Internal Server error"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/internal-server-error
+                title: "Internal Server error"
+                status: 500
+                detail: "Internal Server error"
+                instance: ""
+        '502':
+          description: "Bad Gateway"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-gateway
+                title: "Bad Gateway"
+                status: 502
+                detail: "Bad Gateway"
+                instance: ""
+        '429':
+          description: "Too Many Requests"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/too-many-requests
+                title: "Too Many Requests"
+                status: 429
+                detail: "Too Many Requests"
+                instance: ""
+      security:
+        - oauth2:
+          - read:orders
+    put:
+      tags:
+        - orders
+      operationId: updateOrder
+      parameters:
+        - name: orderId
+          in: path
+          description: IDofpetthatneedstobeupdated
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+          content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Store'
+        '400':
+          description: "Bad Request"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConstraintViolation'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-request
+                title: "Bad Request"
+                status: 400
+                detail: "Bad Request"
+                instance: ""
+        '401':
+          description: "Not Authorized"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-authorized
+                title: "Not Authorized"
+                status: 401
+                detail: "Not Authorized"
+                instance: ""
+        '404':
+          description: "Not Found"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-found
+                title: "Not Found"
+                status: 404
+                detail: "Not Found"
+                instance: ""
+        '500':
+          description: "Internal Server error"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/internal-server-error
+                title: "Internal Server error"
+                status: 500
+                detail: "Internal Server error"
+                instance: ""
+        '502':
+          description: "Bad Gateway"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-gateway
+                title: "Bad Gateway"
+                status: 502
+                detail: "Bad Gateway"
+                instance: ""
+        '429':
+          description: "Too Many Requests"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/too-many-requests
+                title: "Too Many Requests"
+                status: 429
+                detail: "Too Many Requests"
+                instance: ""
+      security:
+        - oauth2:
+          - write:orders
+  /orders/{orderId}/{name}:
+    delete:
+      tags:
+        - orders
+      operationId: deleteOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+          content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Store'
+        '400':
+          description: "Bad Request"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ConstraintViolation'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-request
+                title: "Bad Request"
+                status: 400
+                detail: "Bad Request"
+                instance: ""
+        '401':
+          description: "Not Authorized"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-authorized
+                title: "Not Authorized"
+                status: 401
+                detail: "Not Authorized"
+                instance: ""
+        '404':
+          description: "Not Found"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/not-found
+                title: "Not Found"
+                status: 404
+                detail: "Not Found"
+                instance: ""
+        '500':
+          description: "Internal Server error"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/internal-server-error
+                title: "Internal Server error"
+                status: 500
+                detail: "Internal Server error"
+                instance: ""
+        '502':
+          description: "Bad Gateway"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/bad-gateway
+                title: "Bad Gateway"
+                status: 502
+                detail: "Bad Gateway"
+                instance: ""
+        '429':
+          description: "Too Many Requests"
+          content: 
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Problem'
+              example:
+                type: https://digital-solutions.com/ecommerce/api/v1/orders/too-many-requests
+                title: "Too Many Requests"
+                status: 429
+                detail: "Too Many Requests"
+                instance: ""
+      security:
+        - oauth2:
+          - write:orders
+components: 
+  schemas:  
+    Store:
       type: object
       properties:
-        createDate:
+        accept_language:
           type: string
-          format: date
-          example: 2020-10-15
-        customerId:
+          maxLength: 255
+          example: CT18 9RH
+        comment:
           type: string
-          minLength: 1
-          maxLength: 10
-          example: 10257
-        status:
-          type: string
-          example: pending
-        lines:
-          type: array
-          uniqueItems: true
-          items:
-            $ref: '#/components/schemas/OrderLineDto'      
-    CreateOrderDto:
+          maxLength: 65535
+      required:
+        - accept_language
+        - comment
+    Language:
       type: object
       properties:
-        customerId:
+        user_agent:
           type: string
-          minLength: 1
-          maxLength: 10
-          example: 102587
-        lines:
-          type: array
-          uniqueItems: true
-          items:
-            $ref: '#/components/schemas/OrderLineDto'         
-    OrderLineDto:
+      required:
+        - user_agent
+    Order:
       type: object
       properties:
-        productId:
+        language:
+         $ref: '#/components/schemas/Language'
+        accept_language:
           type: string
-          minLength: 1
-          maxLength: 30
-          example: Product1
-        quantity:
+          maxLength: 255
+          example: CT18 9RH
+        comment:
+          type: string
+          maxLength: 65535
+        commission:
+          type: number
+          format: double
+          maxLength: 15
+        created_by:
           type: integer
           format: int64
-          example: 1
-  # Response schemas          
-    Error:
+          maxLength: 10
+        created_date:
+          type: string
+          format: date-time
+          maxLength: 19
+        custom_field:
+          type: string
+          maxLength: 65535
+        date_added:
+          type: string
+          format: date-time
+          maxLength: 19
+        date_modified:
+          type: string
+          format: date-time
+          maxLength: 19
+        email:
+          type: string
+        fax:
+          type: string
+        firstname:
+          type: string
+        forwarded_ip:
+          type: string
+        invoice_no:
+          type: integer
+          format: int64
+          maxLength: 10
+        invoice_prefix:
+          type: string
+        ip:
+          type: string
+        is_active:
+          type: boolean
+          maxLength: 10
+        lastname:
+          type: string
+        marketing_id:
+          type: integer
+          format: int64
+          maxLength: 10
+        modified_by:
+          type: integer
+          format: int64
+          maxLength: 10
+        modified_date:
+          type: string
+          format: date-time
+        order_id:
+          type: integer
+          format: int64
+          maxLength: 10
+        order_name:
+          type: string
+        order_prefix_id:
+          type: string
+        reward:
+          type: integer
+          format: int64
+          maxLength: 10
+        telephone:
+          type: string
+        total:
+          type: number
+          format: double
+          maxLength: 15
+        user_agent:
+          type: string
+        store:
+         $ref: '#/components/schemas/Store'
+    Problem: 
+      type: object
+      properties: 
+        type: 
+          type: string
+          format: uri-reference
+          example: https://digital-solutions.com/ecommerce/api/v1/orders/orders-not-found
+          default: 'about: blank'
+        title:
+          type: string
+          example: orders not found
+        status: 
+          type: integer
+          format: int32
+            TheHTTPstatuscodegeneratedbytheoriginserverforthisoccurrence
+            oftheproblem.
+          minimum: 100
+          maximum: 600
+          exclusiveMaximum: true
+        detail: 
+          type: string
+          description: >
+            Ahumanreadableexplanationspecifictothisoccurrenceofthe
+            problemthatishelpfultolocatetheproblemandgiveadviceonhow
+            toproceed.WritteninEnglishandreadableforengineers,usuallynot
+            suitedfornontechnicalstakeholdersandnotlocalized.
+          example: somedescriptionfortheerrorsituation
+        instance: 
+          type: string
+          format: uri-reference
+          description: >
+            AURIreferencethatidentifiesthespecificoccurrenceoftheproblem,
+            e.g.byaddingafragmentidentifierorsub-pathtotheproblemtype.
+            Maybeusedtolocatetherootofthisprobleminthesourcecode.
+          example: '/some/uri-reference#specific-occurrence-context'
+    ConstraintViolation:
+      title: ConstraintViolation
       type: object
       properties:
-        code:
+        type:
           type: string
-          example: 1
-        messagge:
+        title:
           type: string
-          example: An error is occurred
-        details:
+        status:
+          type: number
+        violations:
           type: array
-          uniqueItems: true
           items:
-           type: string
-          example: [Missing or not valid Field 'fieldName1',Missing or not valid Field 'fieldName2']
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+            required:
+              - field
+              - message
+    Metadata:
+      type: object
+      properties:
+        pagination: 
+          type: object
+          schema: 
+          $ref: '#/components/schemas/OffsetPagination'
+    OffsetPagination: 
+      type: object
+      properties: 
+          offset: 
+            type: integer
+            format: int64
+            example: 10
+          limit: 
+            type: integer
+            format: int64
+            example: 10
+          total_count: 
+            type: integer
+            format: int64
+          previous_offset: 
+            type: integer
+            format: int64
+            example: 1
+          next_offset: 
+            type: integer
+            format: int64
+            example: 20
+          current_page: 
+            type: integer
+            format: int64
+            example: 2
+          page_count: 
+            type: integer
+            format: int64
+            example: 10
+    CursorPagination:
+      title: CursorPagination
+      type: object
+      properties:
+        self:
+          description: Pagination link|cursor pointing to the current page.
+          type: string
+          format: uri|cursor
+          example: https://digital-solutions.com/ecommerce/api/v1/orders?cursor=dcjadfaXMDdQTQ
+        first:
+          description: Pagination link|cursor pointing to the first page.
+          type: string
+          format: uri|cursor
+          example: https://digital-solutions.com/ecommerce/api/v1/orders?cursor=dcjadfaXMDdQTQ
+        prev:
+          description: Pagination link|cursor pointing to the previous page.
+          type: string
+          format: uri|cursor
+          example: https://digital-solutions.com/ecommerce/api/v1/orders?cursor=dcjadfaXMDdQTQ
+        next:
+          description: Pagination link|cursor pointing to the next page.
+          type: string
+          format: uri|cursor
+          example: https://digital-solutions.com/ecommerce/api/v1/orders?cursor=dcjadfaXMDdQTQ
+        last:
+          description: Pagination link|cursor pointing to the last page.
+          type: string
+          format: uri|cursor
+          example: https://digital-solutions.com/ecommerce/api/v1/orders?cursor=dcjadfaXMDdQTQ
+        query:
+          type: object
+          properties:
+            query-param-<1>:
+              type: string
+          required:
+            - query-param
+        items:
+          type: array
+          items: {}
       required:
-        - code
-        - message      
-   securitySchemes:
-    bearerAuth:
+        - self
+        - first
+        - prev
+        - next
+        - last
+        - query
+        - items
+  responses:
+    # Common responses with response code as identifier
+    200:
+      description: 'Ok'
+      headers:
+        ETag:
+          $ref: '#/components/headers/ETag'
+        CacheControl:
+          $ref: '#/components/headers/ETag'
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    201:
+      description: 'Created'
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    204:
+      description: 'No content'
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    401:
+      description: 'Unauthenticated'
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    404:
+      description: 'Not found'
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    500:
+      description: 'Internal server error'
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        X-Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+    429:
+      description: Too many requests
+      headers:
+        X-RateLimit-Limit:
+          $ref: '#/components/headers/RateLimit'
+        X-RateLimit-Remaining:
+          $ref: '#/components/headers/RateLimitRemaining'
+        X-RateLimit-Reset:
+          $ref: '#/components/headers/RateLimitReset'
+        Retry-After:
+          $ref: '#/components/headers/RetryAfter'
+  headers:
+    CacheControl:
+      description: 'Identifier a cacheable response with caching time information'
+      schema:
+        type: string
+        example: "max-age=43200"
+    ETag:
+      description: 'Identifier for a specific version of a resource'
+      schema:
+        type: string
+        example: Hd027Y5QG
+    RateLimit:
+      description: The number of allowed requests in the current period
+      example: 100
+      schema:
+        format: int32
+        type: integer
+    RateLimitRemaining:
+      description: The number of remaining requests in the current period
+      example: 0
+      schema:
+        format: int32
+        type: integer
+    RateLimitReset:
+      example: 10
+      description: The number of seconds left in the current period
+      schema:
+        format: int32
+        type: integer
+    RetryAfter:
+      description: "Retry contacting the endpoint *at least* after seconds"
+      example: 5
+      schema:
+        format: int32
+        type: integer
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://digital-solutions.com/authorize
+          scopes:
+            write: orders:modifyorders
+            read: orders:readorders
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+    bearerAuth: # arbitrary name for the security scheme
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-  - bearerAuth: []
+  parameters: 
+    offsetParam: 
+      in: query
+      name: offset
+      required: false
+      schema: 
+        type: integer
+        minimum: 0
+    limitParam: 
+      in: query
+      name: limit
+      required: false
+      schema: 
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+    sortOrder: 
+      in: query
+      name: sort
+      required: false
+      schema: 
+        type: string
 tags:
--  name: orders
-   description: Orders
+- name: orders
