@@ -1,6 +1,6 @@
 openapi: 3.0.0  
 servers:    
-  - url: https://digital-solutions.com/ecommerce/api/v1/orders
+  - url: https://digital-solutions.com/ecommerce
 info:   
   description: orders Api Spec description
   version: "1.0" 
@@ -12,7 +12,7 @@ info:
     name: Apache 3
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 paths:
-  /orders:
+  /api/v1/orders:
     post:
       tags:
         - orders
@@ -211,7 +211,7 @@ paths:
       security:
         - oauth2:
           - read:orders
-  /orders/{orderId}:
+  /api/v1/orders/{orderId}:
     get:
       tags:
         - orders
@@ -404,7 +404,6 @@ paths:
       security:
         - oauth2:
           - write:orders
-  /orders/{orderId}/{name}:
     delete:
       tags:
         - orders
@@ -415,12 +414,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: name
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
       responses:
         '204':
           $ref: '#/components/responses/204'
