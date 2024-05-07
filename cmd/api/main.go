@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	// _ "order-service/docs"
-	"order-service/internal/api/router"
-	"order-service/internal/pkg/config"
-	"order-service/internal/pkg/db"
+	"order-service/internal/app/config"
+	"order-service/internal/app/db"
+	"order-service/internal/app/router"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -30,7 +30,7 @@ func setConfiguration(configPath string) {
 }
 
 func main() {
-	setConfiguration("../../data/config-postgres.yml")
+	setConfiguration("configs/config-postgres.yml")
 	// setConfiguration("data/config-postgres.yml")
 	conf := config.GetConfig()
 	// configureLogger(conf)

@@ -1,5 +1,0 @@
-package: controllers
-generate:
-  gin-server: true
-  embedded-spec: true
-#output: petstore-server.gen.go
