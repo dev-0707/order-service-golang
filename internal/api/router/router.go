@@ -34,7 +34,7 @@ func addOrderRestController(ginEngine *gin.Engine, config *config.Configuration,
 		problem := problems.NewProblem(statusCode, c.Request.URL.Path, http.StatusText(statusCode), err.Error())
 		c.JSONP(statusCode, problem)
 	}
-	options := order.GinServerOptions{BaseURL: "/api", Middlewares: nil, ErrorHandler: errorHandler}
+	options := order.GinServerOptions{BaseURL: "/order-service", Middlewares: nil, ErrorHandler: errorHandler}
 	order.RegisterHandlersWithOptions(ginEngine, proximityChannelDelegate, options)
 }
 
