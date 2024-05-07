@@ -1,0 +1,28 @@
+database:
+  driver: "postgres"
+  dbname: "template1"
+  username: "postgres"
+  password: ""
+  host: "localhost"
+  port: "5432"
+  schema: "public"
+  max_lifetime: 7200
+  max_open_conns: 150
+  max_idle_conns: 50
+  debugEnabled: false
+server:
+  port: "3000"
+  secret: "jdnfksdmfksda"
+  mode: "debug"
+  logEnabled: true
+  logFileEnabled: false
+  logPath: "log/api.log"
+  api:
+    swaggerDocsUrl: "/swagger/*any"
+    docsPath: "../docs/swagger.yaml"
+    #docsPath: "/docs/swagger.yaml"
+    docsUrl: "../docs/swagger.yaCml"
+    #docsUrl: "docs/swagger.yaml"
+
+logging:
+ level: "debug"

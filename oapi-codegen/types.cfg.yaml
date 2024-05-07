@@ -1,0 +1,4 @@
+package: dto
+generate:
+  models: true
+output: petstore-types.gen.go
